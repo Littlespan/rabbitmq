@@ -1,9 +1,10 @@
-package m2;
+package m5;
 
 import com.rabbitmq.client.*;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Scanner;
 import java.util.concurrent.TimeoutException;
 
 /**
@@ -26,30 +27,34 @@ public class Consumer {
          * 两边都定义，则不用关心生产者，消费者的启动顺序，谁先启动谁创建队列
          * */
 
-        c.queueDeclare("task_queue", true,false,false,null);
+        //定义名字为 logs 的交换机, 它的类型是 fanout
+        c.exchangeDeclare("topic_logs", BuiltinExchangeType.TOPIC);
 
-        c.basicQos(1);
+        //自动生成对列名,
+        //非持久,独占,自动删除
+        String queueName = c.queueDeclare().getQueue();
+
+        System.out.println("输入bindingKey,用空格隔开:");
+        String[] a = new Scanner(System.in).nextLine().split("\\s");
+
+        //把该队列,绑定到 direct_logs 交换机
+        //允许使用多个 bindingKey
+        for (String bindingKey : a) {
+            c.queueBind(queueName,"topic_logs",bindingKey);
+        }
+
+        System.out.println("等待接收数据");
 
         DeliverCallback deliverCallback = (consumerTag, message) -> {
             String s = new String(message.getBody(), StandardCharsets.UTF_8);
-            System.out.println("收到:" + s);
-            for (int i = 0; i < s.length(); i++) {
-                if(s.charAt(i) == '.'){
-                    try {
-                        Thread.sleep(1000);
-                    }catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-            System.out.println("---------消息处理完成------------");
-            c.basicAck(message.getEnvelope().getDeliveryTag(),false);
+            String routingKey = message.getEnvelope().getRoutingKey();
+            System.out.println("收到:" + routingKey + "-" + s);
         };
 
         CancelCallback cancelCallback = consumerTag -> {
 
         };
         //消费数据
-        c.basicConsume("task_queue",false,deliverCallback,cancelCallback);
+        c.basicConsume(queueName,true,deliverCallback,cancelCallback);
     }
 }

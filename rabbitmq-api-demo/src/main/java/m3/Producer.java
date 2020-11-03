@@ -1,10 +1,11 @@
-package m2;
+package m3;
 
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.MessageProperties;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
 import java.util.concurrent.TimeoutException;
 
@@ -24,17 +25,19 @@ public class Producer {
         f.setPassword("admin");
 
         Channel c = f.newConnection().createChannel();
-        //定义队列
-        c.queueDeclare("task_queue",true,false,false,null);
+
+        //定义名字为logs的交换机,交换机类型为fanout
+        //这一步是必须的，因为禁止发布到不存在的交换。
+        c.exchangeDeclare("logs","fanout");
 
         //发送消息
         while(true){
             System.out.println("输入消息：");
             String msg = new Scanner(System.in).nextLine();
-            if("exit".equals(msg)){
+            if(msg.equals("exit")){
                 break;
             }
-            c.basicPublish("","task_queue", MessageProperties.PERSISTENT_TEXT_PLAIN,msg.getBytes());
+            c.basicPublish("logs","", null,msg.getBytes(StandardCharsets.UTF_8));
         }
     }
 }

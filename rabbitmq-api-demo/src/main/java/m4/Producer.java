@@ -1,10 +1,12 @@
-package m2;
+package m4;
 
+import com.rabbitmq.client.BuiltinExchangeType;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.ConnectionFactory;
-import com.rabbitmq.client.MessageProperties;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Random;
 import java.util.Scanner;
 import java.util.concurrent.TimeoutException;
 
@@ -16,6 +18,8 @@ import java.util.concurrent.TimeoutException;
  */
 public class Producer {
     public static void main(String[] args) throws IOException, TimeoutException {
+        String[] a = {"warning","error","info"};
+
         //连接
         ConnectionFactory f = new ConnectionFactory();
         f.setHost("192.168.64.140");
@@ -24,17 +28,23 @@ public class Producer {
         f.setPassword("admin");
 
         Channel c = f.newConnection().createChannel();
-        //定义队列
-        c.queueDeclare("task_queue",true,false,false,null);
+
+        //定义名字为logs的交换机,交换机类型为direct
+        //这一步是必须的，因为禁止发布到不存在的交换。
+        c.exchangeDeclare("direct_logs", BuiltinExchangeType.DIRECT);
 
         //发送消息
         while(true){
             System.out.println("输入消息：");
             String msg = new Scanner(System.in).nextLine();
-            if("exit".equals(msg)){
+            if(msg.equals("exit")){
                 break;
             }
-            c.basicPublish("","task_queue", MessageProperties.PERSISTENT_TEXT_PLAIN,msg.getBytes());
+            String level = a[new Random().nextInt(a.length)];
+
+            //第二个参数：路由键， 和绑定建进行匹配，将消息路由到匹配的队列
+            c.basicPublish("direct_logs", level , null , msg.getBytes(StandardCharsets.UTF_8));
+            System.out.println("消息已发送: "+level+"-"+msg);
         }
     }
 }
