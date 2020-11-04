@@ -1,7 +1,11 @@
 package cn.tedu.rabitmqspringboot.m2;
 
+import com.rabbitmq.client.Channel;
+import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
+
+import java.io.IOException;
 
 /**
  * @author 作者：hyh
@@ -12,8 +16,13 @@ import org.springframework.stereotype.Component;
 @Component
 public class Consumer {
 
-    @RabbitListener(queues = "helloWorld")
+    @RabbitListener(queues = "task_queue")
     public void receive(String msg){
-        System.out.println("收到：" +msg);
+        System.out.println("消费者1收到：" +msg);
+    }
+
+    @RabbitListener(queues = "task_queue")
+    public void receive2(String msg){
+        System.out.println("消费者2收到：" +msg);
     }
 }

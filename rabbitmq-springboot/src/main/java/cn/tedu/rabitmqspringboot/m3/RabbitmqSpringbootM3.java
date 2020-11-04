@@ -1,5 +1,6 @@
-package cn.tedu.rabitmqspringboot.m2;
+package cn.tedu.rabitmqspringboot.m3;
 
+import cn.tedu.rabitmqspringboot.m2.RabbitmqSpringbootM2;
 import org.springframework.amqp.core.Queue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
@@ -15,14 +16,14 @@ import javax.annotation.PostConstruct;
  * @description 描述：
  */
 @SpringBootApplication
-public class RabbitmqSpringbootM1 {
+public class RabbitmqSpringbootM3 {
     public static void main(String[] args) {
-        SpringApplication.run(RabbitmqSpringbootM1.class,args);
+        SpringApplication.run(RabbitmqSpringbootM3.class,args);
     }
 
     @Bean
-    public Queue getQueue(){
-        return new Queue("helloWorld", false);
+    public Queue taskQueue(){
+        return new Queue("task_queue",true);
     }
 
     @Autowired
@@ -30,6 +31,6 @@ public class RabbitmqSpringbootM1 {
 
     @PostConstruct  //spring完全加载完成，扫描创建所有对象，并完成所有注入操作后执行
     public void getProducer() {
-        producer.send();
+        new Thread(() -> producer.send()).start();
     }
 }

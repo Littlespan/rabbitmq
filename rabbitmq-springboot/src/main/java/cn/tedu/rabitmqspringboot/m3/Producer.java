@@ -1,4 +1,4 @@
-package cn.tedu.rabitmqspringboot.m2;
+package cn.tedu.rabitmqspringboot.m3;
 
 import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.beans.factory.annotation.Autowired;

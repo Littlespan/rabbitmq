@@ -1,9 +1,10 @@
-package cn.tedu.rabitmqspringboot.m2;
+package cn.tedu.rabitmqspringboot.m6;
 
 import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Random;
 import java.util.Scanner;
 
 /**
@@ -20,11 +21,18 @@ public class Producer {
 
     public void send(){
         while (true) {
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
             System.out.print("输入:");
             String s = new Scanner(System.in).nextLine();
-
+            System.out.println("请输入路由键：");
+            String key = new Scanner(System.in).nextLine();
             //spring 默认将消息的 DeliveryMode 设置为 PERSISTENT 持久化,
-            amqpTemplate.convertAndSend("task_queue", s);
+            System.out.println("输出：" + key +" - " + s);
+            amqpTemplate.convertAndSend("topic_logs",key,s);
         }
     }
 

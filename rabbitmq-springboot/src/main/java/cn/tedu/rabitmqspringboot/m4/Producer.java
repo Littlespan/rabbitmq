@@ -1,4 +1,4 @@
-package cn.tedu.rabitmqspringboot.m2;
+package cn.tedu.rabitmqspringboot.m4;
 
 import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +24,7 @@ public class Producer {
             String s = new Scanner(System.in).nextLine();
 
             //spring 默认将消息的 DeliveryMode 设置为 PERSISTENT 持久化,
-            amqpTemplate.convertAndSend("task_queue", s);
+            amqpTemplate.convertAndSend("logs","",s);
         }
     }
 
